@@ -1,0 +1,10 @@
+{
+    "id": "backup",
+    "name": "Backup",
+    "version": "0.1.0",
+    "author": "Matthew Ratcliffe",
+    "description": "A Backup page: choose what to back up, where to send it and how often, take one now, and restore from one. Configuration part by part, message history by channel and date, to this engine, a network path, S3, Azure Blob, SFTP or FTP.",
+    "enabled": true,
+    "oie": { "apiMin": "4.6" },
+    "client": { "entry": "web/plugin.js" }
+}

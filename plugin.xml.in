@@ -1,0 +1,32 @@
+<pluginMetaData path="backup">
+    <name>Backup</name>
+    <author>Matthew Ratcliffe</author>
+    <pluginVersion>@PLUGIN_VERSION@</pluginVersion>
+    <!--
+      Exact string match against the server version, split on commas. An
+      extension declaring anything else is refused outright by ExtensionLoader
+      and silently not loaded, so build.sh stamps this from MIRTH_VERSION.
+    -->
+    <mirthVersion>@MIRTH_VERSION@</mirthVersion>
+    <url>https://openintegrationengine.org</url>
+    <description>Backs up engine configuration -- chosen part by part -- and message history to a zip archive, on a schedule or on demand, and restores from one. Writes to this engine, a directory or a network share reached over SMB with its own credentials, Amazon S3 or an S3-compatible store, Azure Blob Storage, SFTP or FTP, with optional AES-256 encryption and retention.</description>
+
+    <serverClasses>
+        <string>org.openintegrationengine.plugins.backup.BackupServicePlugin</string>
+    </serverClasses>
+
+    <library type="SERVER" path="libs/backup-server.jar" />
+    <!--
+      The one bundled dependency, and only for the SMB network-path destination.
+      The engine ships jcifs-ng too, but in client-lib and inside the File
+      connector's own extension directory, not on the shared server classpath,
+      so an extension cannot rely on seeing it. slf4j-api is jcifs-ng's only
+      required dependency; its optional Bouncy Castle use is for Kerberos, which
+      this does not do.
+    -->
+    <library type="SERVER" path="libs/jcifs-ng-@JCIFS_VERSION@.jar" />
+    <library type="SERVER" path="libs/slf4j-api-@SLF4J_VERSION@.jar" />
+
+    <apiProvider type="SERVLET_INTERFACE" name="org.openintegrationengine.plugins.backup.BackupServletInterface" />
+    <apiProvider type="SERVER_CLASS" name="org.openintegrationengine.plugins.backup.BackupServlet" />
+</pluginMetaData>
