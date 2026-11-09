@@ -319,6 +319,19 @@ final class ConfigCapture {
                 monitor == null ? 0 : monitor.size());
         });
 
+        run(result, BackupScope.TLS_CERTIFICATES, () -> {
+            int n = 0;
+            for (String store : TlsStores.STORES) {
+                String b64 = configuration().getProperty(TlsStores.PLUGIN, store);
+                if (b64 == null || b64.isBlank()) {
+                    continue;
+                }
+                write(root.resolve(TlsStores.FILE_DIR).resolve(store + ".p12.b64"), b64);
+                n += TlsStores.aliasCount(b64);
+            }
+            result.count(BackupScope.TLS_CERTIFICATES.token(), n);
+        });
+
         run(result, BackupScope.USERS, () -> {
             List<User> all = users().getAllUsers();
             if (all == null) {
@@ -548,6 +561,25 @@ final class ConfigCapture {
                     result.problem("data-pruner.properties: " + describe(e));
                 }
             }
+        }
+
+        if (scope.contains(BackupScope.TLS_CERTIFICATES)) {
+            int n = 0;
+            for (String store : TlsStores.STORES) {
+                Path file = root.resolve(TlsStores.FILE_DIR).resolve(store + ".p12.b64");
+                if (!Files.isRegularFile(file)) {
+                    continue;
+                }
+                try {
+                    String existing = configuration().getProperty(TlsStores.PLUGIN, store);
+                    String merged = TlsStores.merge(existing, read(file).trim());
+                    configuration().saveProperty(TlsStores.PLUGIN, store, merged);
+                    n += TlsStores.aliasCount(merged);
+                } catch (Exception e) {
+                    result.problem(relative(root, file) + ": " + describe(e));
+                }
+            }
+            result.count(BackupScope.TLS_CERTIFICATES.token(), n);
         }
 
         if (scope.contains(BackupScope.VOLUME_MONITOR)) {
@@ -1007,6 +1039,9 @@ final class ConfigCapture {
                     break;
                 case VOLUME_MONITOR:
                     present = Files.isRegularFile(root.resolve("volume-monitor.properties"));
+                    break;
+                case TLS_CERTIFICATES:
+                    present = Files.isDirectory(root.resolve(TlsStores.FILE_DIR));
                     break;
                 case USERS:
                     present = Files.isRegularFile(root.resolve("users.xml"));

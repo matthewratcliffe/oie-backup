@@ -51,6 +51,15 @@ public enum BackupScope {
     /** Volume Monitor rules and settings, this repository's monitoring extension. */
     VOLUME_MONITOR("volume-monitor", "Volume Monitor", false),
     /**
+     * The TLS Manager extension's certificates <b>and private keys</b>: the key pairs the
+     * engine presents and the certificates it trusts.
+     *
+     * <p>Private keys go into the archive, so an unencrypted archive holds them in the
+     * clear. Encrypt archives that include this scope. A restore merges by alias and never
+     * deletes: losing a private key that was not in the archive cannot be undone.
+     */
+    TLS_CERTIFICATES("tls-certificates", "TLS Manager certificates and keys", false),
+    /**
      * User accounts, <b>without</b> passwords.
      *
      * <p>The engine keeps credentials in a separate table behind a one-way digest and

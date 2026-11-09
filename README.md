@@ -43,6 +43,7 @@ destinations have not been exercised against real storage** — see
 | Retention | Two limits, and a separate switch to act on them | Setting "keep 7" is not by itself an instruction to delete. Deleting a backup is irreversible and is somebody else's data-retention policy; this carries it out and does not decide it. The console shows exactly which files the current limits select **before** the switch goes on. |
 | What retention will touch | Only files matching this plugin's own name pattern | Pointing a backup at `/mnt/archive` that already holds a year of invoices is a configuration mistake. It must not become a data-loss incident. |
 | Cluster | A claim in the shared record, no election | `state.runningOn` and `state.lastRun` are written *before* the work starts, so a neighbour waking a second later finds the window taken. Two nodes reading at the same instant can both claim; the cost is one extra archive a second apart, and a real lock would mean a table this extension does not own and a crashed node holding it forever. The claim expires after 12 hours. |
+| TLS certificates and keys | Backed up with the TLS Manager extension's own stores; restore **merges by alias** | The key pair store and the trusted certificate store are the two properties TLS Manager keeps in the engine's configuration, so the two extensions share no code and either can be installed alone. The archive then holds **private keys**: encrypt archives that include this scope. A restore adds or replaces aliases and never deletes one, because a private key that was not in the archive cannot be recovered once removed. TLS Manager reloads from the database within about fifteen seconds, so no restart is needed. A TLS Manager in filesystem mode has no such properties and contributes nothing. |
 | Users | Backed up, **without passwords** | The engine keeps credentials behind a one-way digest and exposes no way to write them back. A restored account exists and carries its role and cannot be signed in to until somebody sets a password. Rebuilding twenty users and their roles by hand is its own outage, so it is worth capturing — and the restore report says this every time, rather than only in this table. |
 | Confirmation | Type the archive name | For restore and for delete. A second click is only a slower way to click. |
 
@@ -67,6 +68,8 @@ config/
   data-pruner.properties
   volume-monitor.properties
   users.xml
+  tls-manager/extraKeyStore.p12.b64     TLS Manager key pairs, with private keys
+  tls-manager/extraTrustStore.p12.b64   TLS Manager trusted certificates
 messages/channels.tsv        channel id, name and count, so ids have names
 messages/<channel-id>/1.xml  one file per message, the engine's own export format
 ```
