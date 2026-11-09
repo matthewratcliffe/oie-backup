@@ -213,10 +213,11 @@ public class SelfTest {
         check("archive encryption", "org.openintegrationengine.plugins.backup.ArchiveCipher");
         check("AWS signing",
             "org.openintegrationengine.plugins.backup.destination.AwsV4Signer");
+        check("TLS keystore merge", "org.openintegrationengine.plugins.backup.TlsStores");
         check("SMB paths",
             "org.openintegrationengine.plugins.backup.destination.SmbDestination");
         System.out.println(
-            "    cron, encryption, request signing and SMB paths all hold");
+            "    cron, encryption, request signing, SMB paths and TLS keystore merging all hold");
     }
 
     private static void check(String label, String className) throws Exception {
